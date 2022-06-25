@@ -36,10 +36,11 @@ import { getHandleAndRegistryKey } from '@solana/spl-name-service';
 import useWindowDimensions from '../../utils/layout';
 import { CheckOutlined } from '@ant-design/icons';
 import { ArtType } from '../../types';
-import { MetaAvatar, MetaAvatarDetailed } from '../../components/MetaAvatar';
+import { MetaAvatarDetailed } from '../../components/MetaAvatar';
 import { AmountLabel } from '../../components/AmountLabel';
 import { ClickToCopy } from '../../components/ClickToCopy';
 import { useTokenList } from '../../contexts/tokenList';
+import { useArtist, useValidator, useValidatorBalance } from './hooks';
 
 export const AuctionItem = ({
   item,
@@ -90,6 +91,12 @@ export const AuctionView = () => {
   const { ref, data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
   const creators = useCreators(auction);
   const { pullAuctionPage } = useMeta();
+
+  const artist = useArtist();
+  const connection = useConnection();
+  const validator = useValidator({ connection });
+  const validatorBalance = useValidatorBalance({ connection, validator });
+
   useEffect(() => {
     pullAuctionPage(id);
   }, []);
@@ -321,11 +328,15 @@ export const AuctionView = () => {
             {art.title || <Skeleton paragraph={{ rows: 0 }} />}
           </h2>
           <Row gutter={[44, 0]}>
-            <Col span={12} md={16}>
+            <Col span={24}>
               <div className={'info-container'}>
                 <div className={'info-component'}>
-                  <h6 className={'info-title'}>CREATED BY</h6>
-                  <span>{<MetaAvatar creators={creators} />}</span>
+                  <h6 className={'info-title'}>Artist</h6>
+                  {artist}
+                </div>
+                <div className={'info-component'}>
+                  <h6 className={'info-title'}>Validator</h6>
+                  {validator?.name}
                 </div>
                 <div className={'info-component'}>
                   <h6 className={'info-title'}>Edition</h6>
@@ -358,6 +369,10 @@ export const AuctionView = () => {
                   </span>
                 </div>
                 <div className={'info-component'}>
+                  <h6 className={'info-title'}>Yield</h6>
+                  <span>{validatorBalance}</span>
+                </div>
+                <div className={'info-component'}>
                   <h6 className={'info-title'}>CURRENCY</h6>
                   <span>
                     {nftCount === undefined ? (
@@ -379,8 +394,8 @@ export const AuctionView = () => {
                 </div>
               </div>
             </Col>
-            <Col span={12} md={8} className="view-on-container">
-              <div className="info-view-container">
+            <Col span={24}>
+              <div>
                 <div className="info-view">
                   <h6 className="info-title">View on</h6>
                   <div style={{ display: 'flex' }}>
